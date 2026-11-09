@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VORTEX — Spatial Web Experience</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: #030014;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Fixed Background 3D Canvas */
+    #vortex-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Navigation Bar */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      background: rgba(3, 0, 20, 0.6);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #a855f7, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #38bdf8;
+    }
+
+    .nav-btn {
+      padding: 9px 22px;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+    }
+
+    /* Page Container */
+    .content-wrapper {
+      position: relative;
+      z-index: 5;
+    }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 8% 60px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 1rem;
+      text-align: center;
+      background: linear-gradient(180deg, #ffffff 40%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .section-sub {
+      color: #94a3b8;
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    /* Packages / Pricing Section */
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      max-width: 1150px;
+    }
+
+    .package-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .package-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(6, 182, 212, 0.5);
+      box-shadow: 0 15px 35px -10px rgba(6, 182, 212, 0.25);
+    }
+
+    .package-card.featured {
+      background: rgba(124, 58, 237, 0.07);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 35px -10px rgba(168, 85, 247, 0.35);
+      transform: scale(1.03);
+    }
+
+    .package-card.featured:hover {
+      transform: scale(1.05) translateY(-6px);
+    }
+
+    .featured-tag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #a855f7, #06b6d4);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .package-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .price {
+      font-size: 2.8rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      color: #38bdf8;
+    }
+
+    .price span {
+      font-size: 1rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .features-list {
+      list-style: none;
+      margin-bottom: 2rem;
+      flex-grow: 1;
+    }
+
+    .features-list li {
+      padding: 0.6rem 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .features-list li::before {
+      content: "✔";
+      color: #06b6d4;
+      font-weight: bold;
+    }
+
+    .plan-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .package-card.featured .plan-btn {
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      border: none;
+    }
+
+    .plan-btn:hover {
+      background: #ffffff;
+      color: #030014;
+    }
+
+    /* Contact System Section */
+    .contact-container {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 3rem;
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 3.5rem;
+      backdrop-filter: blur(20px);
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+
+    .info-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(168, 85, 247, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #c084fc;
+      flex-shrink: 0;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #06b6d4;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    select option {
+      background: #0b0c10;
+      color: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .submit-btn {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+    }
+
+    #form-feedback {
+      display: none;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #34d399;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 850px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.5rem;
+      }
+      .package-card.featured {
+        transform: none;
+      }
+    }
+  </style>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- WebGL Vortex Background -->
+  <canvas id="vortex-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#hero" class="logo">VORTEX</a>
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#packages">Packages</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-btn">Get Started</a>
+  </nav>
+
+  <div class="content-wrapper">
+    
+    <!-- Hero Section -->
+    <section id="hero">
+      <div class="badge">Next Generation Web Design</div>
+      <h1>HYPERSPACE READY</h1>
+      <p class="section-sub">
+        Explore flexible 3D web packages in Indian Rupees and send your project requirements directly to our team.
+      </p>
+      <a href="#packages" class="nav-btn" style="padding: 14px 34px; font-size: 1rem;">View Packages</a>
+    </section>
+
+    <!-- Packages Section -->
+    <section id="packages">
+      <div class="badge">Affordable Plans</div>
+      <h2 class="section-title">Select Your Package</h2>
+      <p class="section-sub">High-end interactive 3D websites tailored to your budget.</p>
+
+      <div class="packages-grid">
+        
+        <!-- Starter Package -->
+        <div class="package-card">
+          <div class="package-name">Starter 3D</div>
+          <div class="price">₹1,999 <span>/ project</span></div>
+          <ul class="features-list">
+            <li>Single Page 3D Experience</li>
+            <li>Interactive Particle System</li>
+            <li>Mobile & Desktop Responsive</li>
+            <li>Direct Email Contact System</li>
+            <li>Fast 2-Day Delivery</li>
+          </ul>
+          <button class="plan-btn" onclick="selectPackage('Starter 3D (₹1,999)')">Choose Starter</button>
+        </div>
+
+        <!-- Pro Package (Featured) -->
+        <div class="package-card featured">
+          <div class="featured-tag">Most Popular</div>
+          <div class="package-name">Professional</div>
+          <div class="price">₹4,999 <span>/ project</span></div>
+          <ul class="features-list">
+            <li>Custom 3D Model Integration (.glb)</li>
+            <li>Smooth Scroll-Trigger Animations</li>
+            <li>Neon Lighting & Glow Effects</li>
+            <li>Packages & Contact System Setup</li>
+            <li>Priority Revisions & Support</li>
+          </ul>
+          <button class="plan-btn" onclick="selectPackage('Professional (₹4,999)')">Choose Pro</button>
+        </div>
+
+        <!-- Enterprise Package -->
+        <div class="package-card">
+          <div class="package-name">Enterprise Spatial</div>
+          <div class="price">₹9,999 <span>/ project</span></div>
+          <ul class="features-list">
+            <li>Full Multi-Scene 3D World</li>
+            <li>Custom Shaders & Particle Physics</li>
+            <li>Lead Generation & CRM Delivery</li>
+            <li>Full Source Code Ownership</li>
+            <li>Dedicated Developer Support</li>
+          </ul>
+          <button class="plan-btn" onclick="selectPackage('Enterprise Spatial (₹9,999)')">Choose Enterprise</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Contact System Section -->
+    <section id="contact">
+      <div class="badge">Get In Touch</div>
+      <h2 class="section-title">Send a Transmission</h2>
+      <p class="section-sub">Messages sent here will be delivered directly to your inbox via Web3Forms.</p>
+
+      <div class="contact-container">
+        
+        <!-- Left: Direct Info -->
+        <div class="contact-info">
+          <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Connect Directly</h3>
+          <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
+            Have questions about a package or need a custom quote? Fill out the transmission form.
+          </p>
+
+          <div class="info-card">
+            <div class="info-icon">✉</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Email System</div>
+              <div style="color: #94a3b8; font-size: 0.9rem;">Connected & Active</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📍</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Location</div>
+              <div style="color: #94a3b8; font-size: 0.9rem;">India / Remote Delivery</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">⚡</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Response Time</div>
+              <div style="color: #94a3b8; font-size: 0.9rem;">Fast Delivery (Within 24 Hours)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real Contact Form Connected to Your Access Key -->
+        <form class="contact-form" id="contactForm">
+          <!-- Your Web3Forms Access Key is active here -->
+          <input type="hidden" name="access_key" value="67789654-922d-4f8e-87c5-33ae4ec4d7f0" />
+          
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" name="name" id="name" placeholder="Rahul Sharma" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" placeholder="rahul@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label for="packageSelect">Selected Package</label>
+            <select name="package" id="packageSelect">
+              <option value="General Inquiry">General Inquiry</option>
+              <option value="Starter 3D (₹1,999)">Starter 3D (₹1,999)</option>
+              <option value="Professional (₹4,999)">Professional (₹4,999)</option>
+              <option value="Enterprise Spatial (₹9,999)">Enterprise Spatial (₹9,999)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea name="message" id="message" placeholder="Tell us about your project requirements..." required></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">Send Transmission</button>
+          <div id="form-feedback">Transmission Received! Your message was delivered.</div>
+        </form>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Three.js Background & Contact Submission Script -->
+  <script>
+    // --- 1. Three.js Vortex Setup ---
+    const canvas = document.querySelector('#vortex-canvas');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 400;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const particleCount = 14000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    const color1 = new THREE.Color(0xa855f7);
+    const color2 = new THREE.Color(0x06b6d4);
+
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      const z = (Math.random() - 0.5) * 800;
+      const radius = 20 + Math.pow(Math.abs(z - 100) / 400, 1.8) * 180 + Math.random() * 25;
+      const angle = Math.random() * Math.PI * 2;
+
+      positions[i3] = Math.cos(angle) * radius;
+      positions[i3 + 1] = Math.sin(angle) * radius;
+      positions[i3 + 2] = z;
+
+      const mixedColor = color1.clone().lerp(color2, (z + 400) / 800);
+      colors[i3] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 2.2,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+
+    const vortex = new THREE.Points(geometry, material);
+    scene.add(vortex);
+
+    let targetX = 0;
+    let targetY = 0;
+    let scrollSpeed = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      targetX = (e.clientX - window.innerWidth / 2) * 0.25;
+      targetY = (e.clientY - window.innerHeight / 2) * 0.25;
+    });
+
+    let lastScroll = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.scrollY;
+      scrollSpeed = (currentScroll - lastScroll) * 0.4;
+      lastScroll = currentScroll;
+    });
+
+    const posArr = geometry.attributes.position.array;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      camera.position.x += (targetX - camera.position.x) * 0.05;
+      camera.position.y += (-targetY - camera.position.y) * 0.05;
+      camera.lookAt(0, 0, 0);
+
+      vortex.rotation.z += 0.003;
+
+      const speed = 2.0 + Math.abs(scrollSpeed);
+      scrollSpeed *= 0.92;
+
+      for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3 + 2;
+        posArr[i3] += speed;
+
+        if (posArr[i3] > 400) {
+          posArr[i3] = -400;
+        }
+      }
+      geometry.attributes.position.needsUpdate = true;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- 2. Interactive Package Selection ---
+    function selectPackage(packageName) {
+      document.querySelector('#packageSelect').value = packageName;
+      document.querySelector('#contact').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 3. Live Web3Forms Email Submission ---
+    const form = document.querySelector('#contactForm');
+    const feedback = document.querySelector('#form-feedback');
+    const submitBtn = document.querySelector('#submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      submitBtn.innerText = "Transmitting...";
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      const object = Object.fromEntries(formData);
+      const json = JSON.stringify(object);
+
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+          body: json
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(16, 185, 129, 0.2)';
+          feedback.style.border = '1px solid #10b981';
+          feedback.style.color = '#34d399';
+          feedback.innerText = 'Transmission Received! Check your email inbox.';
+          form.reset();
+        } else {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+          feedback.style.border = '1px solid #ef4444';
+          feedback.style.color = '#f87171';
+          feedback.innerText = 'Error: ' + result.message;
+        }
+      } catch (error) {
+        feedback.style.display = 'block';
+        feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+        feedback.style.border = '1px solid #ef4444';
+        feedback.style.color = '#f87171';
+        feedback.innerText = 'Network error. Please try again.';
+      } finally {
+        submitBtn.innerText = "Send Transmission";
+        submitBtn.disabled = false;
+        setTimeout(() => {
+          feedback.style.display = 'none';
+        }, 6000);
+      }
+    });
+  </script>
+</body>
+</html>
